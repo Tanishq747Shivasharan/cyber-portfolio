@@ -1,11 +1,13 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Cyber Portfolio</title>
     <link rel="stylesheet" href="css/style.css">
 </head>
+
 <body>
     <div class="terminal">
         <div class="terminal-header">
@@ -19,20 +21,33 @@
         </div>
 
         <div class="terminal-body">
-            <div id="output">
-                Welcome to Tanishq's Portfolio<br>
-                Type 'help' to get started.
-            </div>
 
-            <div class="input-line">
+    <div id="output">
+<pre>
+┌─────────────────────────────────────────────┐
+│           TANISHQ PORTFOLIO                 │
+├─────────────────────────────────────────────┤
+│ Cybersecurity • Cloud Security • Networking │
+└─────────────────────────────────────────────┘
+
+Type 'help' to begin.
+</pre>
+    </div>
+
+    <div class="input-line">
+        <span class="prompt">
+            tanishqss@portfolio:~$
+        </span>
+
+        <input type="text" id="command-input" autocomplete="off" autofocus>
+    </div>
+
+</div>
                 <span class="prompt">
                     tanishqss@portfolio:~$
                 </span>
 
-                <input type="text"
-                        id="command-input"
-                        autocomplete="off"
-                        autofocus>
+                <input type="text" id="command-input" autocomplete="off" autofocus>
             </div>
         </div>
     </div>
@@ -41,4 +56,5 @@
     <script src="js/commands.js"></script>
     <script src="js/terminal.js"></script>
 </body>
+
 </html>

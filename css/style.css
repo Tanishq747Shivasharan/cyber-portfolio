@@ -68,6 +68,8 @@ body {
 
 .terminal-body {
     padding: 15px;
+    height: calc(100% - 40px);
+    overflow-y: auto;
 }
 
 .input-line {
