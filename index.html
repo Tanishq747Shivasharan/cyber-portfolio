@@ -4,57 +4,38 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Cyber Portfolio</title>
+    <title>Tanishq Shivasharan — Terminal Portfolio</title>
+    <meta name="description" content="Cybersecurity developer & web engineer. Interactive terminal portfolio." />
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet" />
     <link rel="stylesheet" href="css/style.css">
 </head>
 
 <body>
-    <div class="terminal">
-        <div class="terminal-header">
-            <span class="dot red"></span>
-            <span class="dot yellow"></span>
-            <span class="dot green"></span>
+<div id="app">
+  <div class="tbar">
+    <div class="dot dr"></div>
+    <div class="dot dy"></div>
+    <div class="dot dg"></div>
+    <span class="btitle">tanishq@portfolio ~ bash [AI-powered]</span>
+  </div>
 
-            <span class="title">
-                tanishqss@portfolio:~
-            </span>
-        </div>
+  <div class="tbody" id="out"></div>
 
-        <div class="terminal-body">
-
-    <div id="output">
-<pre>
-┌─────────────────────────────────────────────┐
-│           TANISHQ PORTFOLIO                 │
-├─────────────────────────────────────────────┤
-│ Cybersecurity • Cloud Security • Networking │
-└─────────────────────────────────────────────┘
-
-Type 'help' to begin.
-</pre>
-    </div>
-
-    <div class="input-line">
-        <span class="prompt">
-            tanishqss@portfolio:~$
-        </span>
-
-        <input type="text" id="command-input" autocomplete="off" autofocus>
-    </div>
-
+  <div class="irow">
+    <span class="pp">
+      tanishq<span class="at">@</span>portfolio<span class="at">:</span><span class="pth">~</span><span class="at">$</span>
+    </span>
+    <input id="ci" type="text"
+      autocomplete="off" autocorrect="off"
+      autocapitalize="off" spellcheck="false"
+      placeholder="type a command or ask me anything..." />
+  </div>
 </div>
-                <span class="prompt">
-                    tanishqss@portfolio:~$
-                </span>
 
-                <input type="text" id="command-input" autocomplete="off" autofocus>
-            </div>
-        </div>
-    </div>
-
-    <script src="js/data.js"></script>
-    <script src="js/commands.js"></script>
-    <script src="js/terminal.js"></script>
+<script src="js/commands.js"></script>
+<script src="js/data.js"></script>
+<script src="js/terminal.js"></script>
 </body>
 
 </html>

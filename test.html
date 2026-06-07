@@ -1,0 +1,442 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Tanishq Shivasharan — Terminal Portfolio</title>
+<meta name="description" content="Cybersecurity developer & web engineer. Interactive terminal portfolio." />
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet" />
+<style>
+  *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+  :root {
+    --green: #39ff14;
+    --green2: #27c85a;
+    --green3: #00e57f;
+    --cyan: #00e5cc;
+    --yellow: #ffe94d;
+    --red: #ff4d6a;
+    --magenta: #e040fb;
+    --orange: #ff9800;
+    --white: #c8d8c8;
+    --dim: #1a301a;
+    --bg: #080c08;
+    --bg2: #0d120d;
+    --bg3: #0a0f0a;
+    --border: #162016;
+  }
+
+  html, body {
+    height: 100%;
+    background: var(--bg);
+    font-family: 'JetBrains Mono', 'Courier New', monospace;
+    color: var(--green);
+    overflow: hidden;
+  }
+
+  #app {
+    display: flex;
+    flex-direction: column;
+    height: 100vh;
+  }
+
+  /* ── Title bar ── */
+  .tbar {
+    background: var(--bg2);
+    border-bottom: 1px solid var(--border);
+    padding: 8px 16px;
+    display: flex;
+    align-items: center;
+    gap: 7px;
+    flex-shrink: 0;
+    user-select: none;
+  }
+  .dot { width: 12px; height: 12px; border-radius: 50%; }
+  .dr  { background: #ff5f57; }
+  .dy  { background: #febc2e; }
+  .dg  { background: #28c840; }
+  .btitle {
+    margin: 0 auto;
+    font-size: 11px;
+    color: #2a4a2a;
+    letter-spacing: .1em;
+  }
+
+  /* ── Terminal output ── */
+  .tbody {
+    flex: 1;
+    overflow-y: auto;
+    padding: 14px 20px;
+    scroll-behavior: smooth;
+  }
+  .tbody::-webkit-scrollbar { width: 4px; }
+  .tbody::-webkit-scrollbar-track { background: var(--bg); }
+  .tbody::-webkit-scrollbar-thumb { background: #1e3a1e; border-radius: 2px; }
+
+  .line {
+    font-size: 13px;
+    line-height: 1.65;
+    white-space: pre-wrap;
+    word-break: break-word;
+    margin-bottom: 1px;
+  }
+
+  /* colour helpers */
+  .dim   { color: var(--dim);     }
+  .g     { color: var(--green);   }
+  .g2    { color: var(--green2);  }
+  .c     { color: var(--cyan);    }
+  .y     { color: var(--yellow);  }
+  .r     { color: var(--red);     }
+  .m     { color: var(--magenta); }
+  .o     { color: var(--orange);  }
+  .w     { color: var(--white);   }
+  .b     { font-weight: 700;      }
+  .ascii { color: var(--green2); font-size: 12px; line-height: 1.25; }
+  .sep   { color: var(--dim);     }
+
+  .ai-badge {
+    display: inline-block;
+    background: #0a1e0a;
+    border: 1px solid #1a4a1a;
+    color: var(--green2);
+    font-size: 10px;
+    padding: 1px 5px;
+    border-radius: 3px;
+    margin-right: 6px;
+    vertical-align: middle;
+  }
+
+  .thinking {
+    color: #2a5a2a;
+    font-style: italic;
+    animation: pulse 1.2s ease-in-out infinite;
+  }
+  @keyframes pulse { 0%,100%{opacity:.4} 50%{opacity:1} }
+
+  /* ── Input row ── */
+  .irow {
+    background: var(--bg3);
+    border-top: 1px solid var(--border);
+    padding: 10px 20px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex-shrink: 0;
+  }
+  .pp {
+    color: var(--green3);
+    font-size: 13px;
+    white-space: nowrap;
+    user-select: none;
+  }
+  .pp .at  { color: #1e5a1e; }
+  .pp .pth { color: var(--green2); }
+  #ci {
+    flex: 1;
+    background: transparent;
+    border: none;
+    outline: none;
+    color: var(--green);
+    font-family: 'JetBrains Mono', 'Courier New', monospace;
+    font-size: 13px;
+    caret-color: var(--green);
+  }
+  #ci::placeholder { color: #1e4020; }
+
+  /* ── Mobile ── */
+  @media (max-width: 600px) {
+    .line  { font-size: 11px; }
+    .ascii { font-size: 10px; }
+    .irow  { padding: 8px 12px; }
+    .pp    { font-size: 11px; }
+    #ci    { font-size: 11px; }
+  }
+</style>
+</head>
+<body>
+<div id="app">
+  <div class="tbar">
+    <div class="dot dr"></div>
+    <div class="dot dy"></div>
+    <div class="dot dg"></div>
+    <span class="btitle">tanishq@portfolio ~ bash [AI-powered]</span>
+  </div>
+
+  <div class="tbody" id="out"></div>
+
+  <div class="irow">
+    <span class="pp">
+      tanishq<span class="at">@</span>portfolio<span class="at">:</span><span class="pth">~</span><span class="at">$</span>
+    </span>
+    <input id="ci" type="text"
+      autocomplete="off" autocorrect="off"
+      autocapitalize="off" spellcheck="false"
+      placeholder="type a command or ask me anything..." />
+  </div>
+</div>
+
+<script>
+const out = document.getElementById('out');
+const inp = document.getElementById('ci');
+let hist = [], hidx = -1, busy = false;
+
+/* ── Profile context injected into every AI call ── */
+const PROFILE = `You are the terminal persona of Tanishq Shivasharan — a cybersecurity-focused developer from Pune, India.
+Answer ONLY as this terminal. Be concise, technical, and stoic. Use short lines. Prefix each line with 2 spaces. No markdown headers or bullet chars. Max 14 lines.
+
+Facts:
+- Name: Tanishq Shivasharan
+- Role: Cybersecurity learner & web developer
+- Stack: Python, Java, JavaScript, Spring Boot, Node.js, HTML/CSS
+- Projects: VIGIL (cybersecurity suite), CNRRS (Spring Boot noise-reporting app), JS_PY-Fun (security practice), WPD (web design), Traffic Light Simulator (Java)
+- GitHub: github.com/Tanishq747Shivasharan  (27 repos, 27 followers)
+- LinkedIn: linkedin.com/in/tanishq-shivasharan-1120a0233
+- Location: Pune, Maharashtra, India
+- Philosophy: Be Stoic. Code daily. Break things to understand them.
+- Interests: Network security, ethical hacking, cloud security, backend engineering
+- GitHub achievements: Pull Shark, Quickdraw
+- Open to: Internships, freelance, collaboration`;
+
+/* ── Static command data ── */
+const CMDS = {
+  help: [
+    {t:'c b', v:'AVAILABLE COMMANDS'},
+    {t:'sep',  v:'─'.repeat(46)},
+    {t:'w',    v:'  help          this list'},
+    {t:'w',    v:'  about         who is Tanishq'},
+    {t:'w',    v:'  skills        tech stack & proficiency'},
+    {t:'w',    v:'  projects      featured builds'},
+    {t:'w',    v:'  education     background & learning path'},
+    {t:'w',    v:'  contact       socials & links'},
+    {t:'w',    v:'  neofetch      sysinfo + ASCII art'},
+    {t:'w',    v:'  clear         wipe terminal'},
+    {t:'sep',  v:'─'.repeat(46)},
+    {t:'g2',   v:'  ↳ anything else is answered by Claude AI'},
+    {t:'',     v:''},
+  ],
+  about: [
+    {t:'y b', v:'ABOUT'},
+    {t:'sep',  v:'─'.repeat(46)},
+    {t:'',     v:''},
+    {t:'w',    v:'  Tanishq Shivasharan — Pune, Maharashtra, IN'},
+    {t:'w',    v:'  Cybersecurity Dev & Scalable Web Engineer'},
+    {t:'',     v:''},
+    {t:'w',    v:'  Building systems. Breaking systems.'},
+    {t:'w',    v:'  Learning daily — with zero shortcuts.'},
+    {t:'',     v:''},
+    {t:'w',    v:'  Focus: Network Sec · Backend Eng · Cloud Sec'},
+    {t:'g',    v:'  Motto: "Be Stoic. Code daily. Break things."'},
+    {t:'',     v:''},
+  ],
+  skills: [
+    {t:'m b', v:'TECH STACK'},
+    {t:'sep',  v:'─'.repeat(46)},
+    {t:'',     v:''},
+    {t:'c',    v:'  Languages'},
+    {t:'w',    v:'  Python      ████████████████░░░░  80%'},
+    {t:'w',    v:'  Java        ██████████████░░░░░░  70%'},
+    {t:'w',    v:'  JavaScript  ████████████░░░░░░░░  60%'},
+    {t:'w',    v:'  HTML/CSS    ████████████████████  95%'},
+    {t:'',     v:''},
+    {t:'c',    v:'  Frameworks & Tools'},
+    {t:'w',    v:'  Spring Boot · Node.js · React · Git · MySQL · Linux'},
+    {t:'',     v:''},
+    {t:'c',    v:'  Cybersecurity'},
+    {t:'w',    v:'  Nmap · Wireshark · OWASP Top 10 · Ethical Hacking'},
+    {t:'',     v:''},
+    {t:'c',    v:'  Growing toward'},
+    {t:'w',    v:'  Cloud Sec (AWS/GCP) · Penetration Testing · Sec Eng'},
+    {t:'',     v:''},
+  ],
+  projects: [
+    {t:'o b', v:'PROJECTS'},
+    {t:'sep',  v:'─'.repeat(46)},
+    {t:'',     v:''},
+    {t:'y b',  v:'  [01] VIGIL — End-to-End Cybersecurity Suite'},
+    {t:'w',    v:'       Mobile network scans → web-app security integration'},
+    {t:'g2',   v:'       Status: Active Development'},
+    {t:'',     v:''},
+    {t:'y b',  v:'  [02] CNRRS — Community Noise Reporting System'},
+    {t:'w',    v:'       Spring Boot · Java · MySQL · HTML'},
+    {t:'w',    v:'       Geo-tagged civic reports + admin dashboard'},
+    {t:'c',    v:'       ⭐ 1 star on GitHub'},
+    {t:'',     v:''},
+    {t:'y b',  v:'  [03] JS_PY-Fun — Security Practice Platform'},
+    {t:'w',    v:'       CTF-style JS + Python security exercises'},
+    {t:'g2',   v:'       Status: Active Development'},
+    {t:'',     v:''},
+    {t:'y b',  v:'  [04] WPD — Web Page Designing Collection'},
+    {t:'w',    v:'       HTML/CSS/JS resources for Polytechnic students'},
+    {t:'c',    v:'       ⭐ 1 star on GitHub'},
+    {t:'',     v:''},
+    {t:'y b',  v:'  [05] Traffic Light Simulator — Java'},
+    {t:'w',    v:'       State machine traffic control system'},
+    {t:'',     v:''},
+    {t:'w',    v:'  → All 27 repos: github.com/Tanishq747Shivasharan'},
+    {t:'',     v:''},
+  ],
+  education: [
+    {t:'c b', v:'EDUCATION'},
+    {t:'sep',  v:'─'.repeat(46)},
+    {t:'',     v:''},
+    {t:'y',    v:'  Diploma in Computer Engineering'},
+    {t:'w',    v:'  Polytechnic Institute, Maharashtra, India'},
+    {t:'w',    v:'  Core: Web Dev · Networking · Programming'},
+    {t:'',     v:''},
+    {t:'g',    v:'  Self-Learning Path'},
+    {t:'w',    v:'  Cybersecurity · Cloud Computing · DSA (Java)'},
+    {t:'w',    v:'  Open Source contribution · Security Engineering'},
+    {t:'',     v:''},
+    {t:'g2',   v:'  GitHub Achievements: Pull Shark · Quickdraw'},
+    {t:'',     v:''},
+  ],
+  contact: [
+    {t:'m b', v:'CONTACT & SOCIALS'},
+    {t:'sep',  v:'─'.repeat(46)},
+    {t:'',     v:''},
+    {t:'w',    v:'  GitHub   → github.com/Tanishq747Shivasharan'},
+    {t:'w',    v:'  LinkedIn → linkedin.com/in/tanishq-shivasharan-1120a0233'},
+    {t:'',     v:''},
+    {t:'w',    v:'  Location: Pune, Maharashtra, India'},
+    {t:'',     v:''},
+    {t:'g',    v:'  Open to: Internships · Freelance · Collaboration'},
+    {t:'',     v:''},
+  ],
+  neofetch: [
+    {t:'ascii', v:'  ████████╗ ███████╗'},
+    {t:'ascii', v:'  ╚══██╔══╝ ██╔════╝      tanishq@portfolio'},
+    {t:'ascii', v:'     ██║    ███████╗       ────────────────────────────'},
+    {t:'ascii', v:'     ██║    ╚════██║       OS:    Curiosity Linux 4.7'},
+    {t:'ascii', v:'     ██║    ███████║       Shell: bash (stoic edition)'},
+    {t:'ascii', v:'     ╚═╝    ╚══════╝       Role:  Cybersecurity Dev'},
+    {t:'',      v:''},
+    {t:'w',     v:'  Stack   : Python · Java · JS · Spring Boot'},
+    {t:'w',     v:'  Repos   : 27  |  Followers: 27'},
+    {t:'w',     v:'  Mission : Build. Break. Understand. Repeat.'},
+    {t:'g',     v:'  Status  : Actively grinding'},
+    {t:'',      v:''},
+  ],
+};
+
+/* ── Helpers ── */
+function esc(s){ return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+
+function addLine(cls, text) {
+  const d = document.createElement('div');
+  d.className = 'line';
+  (cls||'').split(' ').forEach(c => { if(c) d.classList.add(c); });
+  d.textContent = text ?? '';
+  out.appendChild(d);
+  return d;
+}
+
+function addPrompt(cmd) {
+  const d = document.createElement('div');
+  d.className = 'line';
+  d.innerHTML = `<span style="color:#00e57f">tanishq<span style="color:#1e5a1e">@</span>portfolio<span style="color:#1e5a1e">:</span><span style="color:#27c85a">~</span><span style="color:#1e5a1e">$</span></span> <span style="color:#39ff14">${esc(cmd)}</span>`;
+  out.appendChild(d);
+}
+
+function renderLines(lines) {
+  lines.forEach(l => addLine((l.t||'').replace('sep','sep'), l.v ?? ''));
+}
+
+function scroll() { setTimeout(() => { out.scrollTop = out.scrollHeight; }, 10); }
+
+/* ── AI fallback via Anthropic API ── */
+async function askAI(cmd) {
+  const thinking = addLine('thinking', '  [AI] thinking...');
+  scroll();
+
+  try {
+    const res = await fetch('https://api.anthropic.com/v1/messages', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        model: 'claude-sonnet-4-20250514',
+        max_tokens: 1000,
+        system: PROFILE,
+        messages: [{ role: 'user', content: cmd }]
+      })
+    });
+
+    const data = await res.json();
+    const text = data.content?.[0]?.text || '  [no response received]';
+
+    out.removeChild(thinking);
+
+    const badge = document.createElement('div');
+    badge.className = 'line';
+    badge.innerHTML = `<span class="ai-badge">AI</span><span class="g2">Claude responded:</span>`;
+    out.appendChild(badge);
+
+    text.split('\n').forEach(l => addLine('w', l));
+    addLine('', '');
+
+  } catch (e) {
+    out.removeChild(thinking);
+    addLine('r', '  [AI error] Could not reach Claude API.');
+    addLine('w', '  Deploy on claude.ai or add your API key below.');
+    addLine('', '');
+  }
+
+  scroll();
+  busy = false;
+}
+
+/* ── Command runner ── */
+function run(raw) {
+  if (busy) return;
+  const cmd = raw.trim();
+  addPrompt(cmd);
+  if (!cmd) { scroll(); return; }
+
+  const key = cmd.toLowerCase();
+  if (key === 'clear') { out.innerHTML = ''; return; }
+
+  if (CMDS[key]) {
+    renderLines(CMDS[key]);
+    scroll();
+    return;
+  }
+
+  busy = true;
+  askAI(cmd);
+}
+
+/* ── Boot sequence ── */
+renderLines([
+  {t:'dim', v:'╔══════════════════════════════════════════════════╗'},
+  {t:'dim', v:'║     TANISHQ SHIVASHARAN — AI TERMINAL  v3.0     ║'},
+  {t:'dim', v:'╚══════════════════════════════════════════════════╝'},
+  {t:'',    v:''},
+  {t:'g',   v:'  System online. Claude AI engine connected.'},
+  {t:'w',   v:'  Type \'help\' for commands — or ask me anything.'},
+  {t:'',    v:''},
+]);
+scroll();
+
+/* ── Input handling ── */
+inp.addEventListener('keydown', e => {
+  if (e.key === 'Enter') {
+    const v = inp.value;
+    if (v.trim()) { hist.unshift(v); hidx = -1; }
+    run(v);
+    inp.value = '';
+  } else if (e.key === 'ArrowUp') {
+    e.preventDefault();
+    if (hidx < hist.length - 1) { hidx++; inp.value = hist[hidx]; }
+  } else if (e.key === 'ArrowDown') {
+    e.preventDefault();
+    if (hidx > 0) { hidx--; inp.value = hist[hidx]; }
+    else { hidx = -1; inp.value = ''; }
+  }
+});
+
+out.addEventListener('click', () => inp.focus());
+inp.focus();
+</script>
+</body>
+</html>

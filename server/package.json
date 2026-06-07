@@ -1,0 +1,17 @@
+{
+  "name": "cyber-portfolio-ai-proxy",
+  "version": "1.0.0",
+  "description": "Simple proxy to keep AI API keys server-side for the portfolio",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "MIT",
+  "dependencies": {
+    "cors": "^2.8.5",
+    "dotenv": "^16.0.0",
+    "express": "^4.18.2"
+  }
+}
