@@ -1,3 +1,24 @@
-.env
+# Dependencies
 node_modules/
-npm-debug.log
+server/node_modules/
+
+# Environment variables — NEVER commit real keys
+.env
+server/.env
+*.env.local
+
+# OS junk
+.DS_Store
+Thumbs.db
+
+# Editor
+.vscode/
+*.swp
+
+# Logs
+*.log
+npm-debug.log*
+
+# Build artifacts (if you add a bundler later)
+dist/
+build/

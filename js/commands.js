@@ -5,77 +5,57 @@
 //    1. Add its output array to CMDS in data.js
 //    2. That's it — the router here picks it up automatically.
 //
-// ─────────────────────────────────────────────
-//  commands.js  —  AI provider + command runner
-//
-//  This portfolio uses Groq only, routed through a server-side proxy.
-//  The proxy keeps the Groq key secret in `server/.env`.
+//  SWITCHING AI PROVIDER:
+//    Change AI_PROVIDER below to 'ollama', 'gemini', or 'groq'
+//    Then fill in the matching config section.
 // ─────────────────────────────────────────────
 
+// ── CONFIGURE YOUR AI BACKEND HERE ───────────
+//
+//  All AI calls go through YOUR OWN server (server/server.js).
+//  The Groq API key lives in server/.env and never reaches the browser.
+//
+//  PROXY_URL must match where you run `npm start` inside server/.
+//  server.js listens on port 3000 by default — so run the FRONTEND
+//  on a different port, e.g.:
+//    backend:  cd server && npm start         → http://localhost:3000
+//    frontend: npx serve . -p 5500            → http://localhost:5500
+//
+const PROXY_URL = 'http://localhost:3000/api/ai';
+
+// server.js currently only implements 'groq'. If you add gemini/ollama
+// branches there later, you can switch this to match.
 const AI_PROVIDER = 'groq';
-const AI_PROXY_URL = 'http://localhost:3000/api/ai';
 
 const AI_CONFIG = {
   groq: {
-    model: 'groq/compound-mini',
+    model: 'llama-3.3-70b-versatile',   // current Groq model — replaces decommissioned llama3-8b-8192
   },
 };
 // ─────────────────────────────────────────────
 
-// Helper: try common response shapes and return the first found text
-function extractTextFromResponse(data) {
-  if (!data) return null;
-  // Common shapes across providers
-  const checks = [
-    () => data.content?.[0]?.text,
-    () => data.message?.content,
-    () => data.candidates?.[0]?.content?.parts?.[0]?.text,
-    () => data.candidates?.[0]?.message?.content,
-    () => data.choices?.[0]?.message?.content,
-    () => data.choices?.[0]?.text,
-    () => data.output?.[0]?.content?.text,
-    () => data.result,
-  ];
-  for (const fn of checks) {
-    try {
-      const v = fn();
-      if (v) return v;
-    } catch (e) { /* continue */ }
-  }
-  return null;
-}
 
-function formatAIResponse(text, userMsg) {
-  const cleanText = (text || '[no response]').trim();
-  const header = `  [AI response to your query]`;
-  const query = `  Query: ${userMsg}`;
-  const divider = '  ───────────────────────────────────────';
-  return `${header}\n${query}\n${divider}\n${cleanText}`;
-}
-
-// ── AI provider implementations ───────────────
-
-async function fetchGroq(userMsg) {
-  const res = await fetch(AI_PROXY_URL, {
+// ── Single fetch function — talks to YOUR proxy, never the AI vendor directly ──
+async function fetchAI(userMsg) {
+  const res = await fetch(PROXY_URL, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ provider: 'groq', model: AI_CONFIG.groq.model, message: userMsg, profile: PROFILE }),
+    body: JSON.stringify({
+      provider: AI_PROVIDER,
+      model:    AI_CONFIG[AI_PROVIDER]?.model,
+      message:  userMsg,
+      profile:  PROFILE,   // from data.js — your system prompt
+    }),
   });
-  if (!res.ok) {
-    let errBody = '';
-    try { errBody = JSON.stringify(await res.json()); } catch (e) { errBody = await res.text(); }
-    throw new Error(`Proxy Groq request failed (${res.status}): ${errBody}`);
-  }
-  const data = await res.json();
-  return data.text || '[no response]';
-}
 
-// ── Route to the selected provider ────────────
-async function fetchAI(userMsg) {
-  if (AI_PROVIDER !== 'groq') {
-    throw new Error(`Unsupported AI_PROVIDER: "${AI_PROVIDER}"`);
+  if (!res.ok) {
+    const errBody = await res.json().catch(() => ({}));
+    throw new Error(errBody.error || `Proxy returned ${res.status}`);
   }
-  return fetchGroq(userMsg);
+
+  const data = await res.json();
+  if (data.error) throw new Error(data.error);
+  return data.text || '[no response from proxy]';
 }
 
 // ── askAI: wraps fetchAI with terminal UI ─────
@@ -89,18 +69,27 @@ async function askAI(cmd) {
 
     const badge = document.createElement('div');
     badge.className = 'line';
-    badge.innerHTML = `<span class="ai-badge">AI</span><span class="g2">${AI_PROVIDER} responded:</span>`;
+    badge.innerHTML = `<span class="ai-badge">AI</span><span class="g2">${AI_PROVIDER} (via proxy) responded:</span>`;
     Terminal.out.appendChild(badge);
 
-    const formatted = formatAIResponse(text, cmd);
-    formatted.split('\n').forEach(l => Terminal.addLine('w', l));
+    text.split('\n').forEach(l => Terminal.addLine('w', l));
     Terminal.addLine('', '');
 
   } catch (e) {
     Terminal.out.removeChild(thinking);
-    Terminal.addLine('r', `  [AI error] ${e.message}`);
-    Terminal.addLine('w', `  Provider set to: "${AI_PROVIDER}"`);
-    Terminal.addLine('w', '  Check your API key and proxy server, then try again.');
+
+    // A network-level failure (server not running, wrong port, CORS block)
+    // throws a generic TypeError from fetch — distinguish it from a proper
+    // error response the server sent back on purpose.
+    const isNetworkError = e instanceof TypeError;
+
+    if (isNetworkError) {
+      Terminal.addLine('r', '  [AI error] Could not reach the proxy server.');
+      Terminal.addLine('w', `  Expected it running at: ${PROXY_URL}`);
+      Terminal.addLine('w', '  Run: cd server && npm start');
+    } else {
+      Terminal.addLine('r', `  [AI error] ${e.message}`);
+    }
     Terminal.addLine('', '');
   }
 
@@ -133,4 +122,3 @@ function run(raw) {
   Terminal.busy = true;
   askAI(cmd);
 }
-
